@@ -1,4 +1,4 @@
-import AVFoundation
+@preconcurrency import AVFoundation
 import CoreAudio
 import Foundation
 import Observation
@@ -83,8 +83,8 @@ final class SoundTest {
     private var playDuration: TimeInterval = 0
     private var generation = 0
 
-    private static let ioQueue = DispatchQueue(label: "dev.bryceadams.MicCheck.test.io", qos: .userInteractive)
-    private static let controlQueue = DispatchQueue(label: "dev.bryceadams.MicCheck.test.control", qos: .userInitiated)
+    private nonisolated static let ioQueue = DispatchQueue(label: "dev.bryceadams.MicCheck.test.io", qos: .userInteractive)
+    private nonisolated static let controlQueue = DispatchQueue(label: "dev.bryceadams.MicCheck.test.control", qos: .userInitiated)
 
     var isActive: Bool {
         switch phase {

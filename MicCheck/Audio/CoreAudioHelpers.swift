@@ -18,7 +18,7 @@ enum CoreAudioHelpers {
         var a = addr
         var size = UInt32(MemoryLayout<T>.size)
         var result = value
-        let status = AudioObjectGetPropertyData(object, &a, 0, nil, &size, &result)
+        let status = withUnsafeMutablePointer(to: &result) { AudioObjectGetPropertyData(object, &a, 0, nil, &size, $0) }
         return status == noErr ? result : nil
     }
 
@@ -37,7 +37,7 @@ enum CoreAudioHelpers {
         guard AudioObjectGetPropertyDataSize(object, &a, 0, nil, &size) == noErr, size > 0 else { return [] }
         let count = Int(size) / MemoryLayout<T>.size
         var buffer = [T](unsafeUninitializedCapacity: count) { _, initialized in initialized = count }
-        let status = AudioObjectGetPropertyData(object, &a, 0, nil, &size, &buffer)
+        let status = buffer.withUnsafeMutableBytes { AudioObjectGetPropertyData(object, &a, 0, nil, &size, $0.baseAddress!) }
         return status == noErr ? buffer : []
     }
 
@@ -45,6 +45,6 @@ enum CoreAudioHelpers {
     static func set<T>(_ object: AudioObjectID, _ addr: AudioObjectPropertyAddress, value: T) -> Bool {
         var a = addr
         var v = value
-        return AudioObjectSetPropertyData(object, &a, 0, nil, UInt32(MemoryLayout<T>.size), &v) == noErr
+        return withUnsafePointer(to: &v) { AudioObjectSetPropertyData(object, &a, 0, nil, UInt32(MemoryLayout<T>.size), $0) } == noErr
     }
 }

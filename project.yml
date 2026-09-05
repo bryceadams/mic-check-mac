@@ -34,10 +34,17 @@ targets:
     entitlements:
       path: MicCheck/Resources/MicCheck.entitlements
       properties:
-        com.apple.security.app-sandbox: false
+        # Hardened runtime: microphone access requires this even without the sandbox.
         com.apple.security.device.audio-input: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.bryceadams.MicCheck
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         GENERATE_INFOPLIST_FILE: NO
+      configs:
+        Release:
+          # Keep get-task-allow out of Release builds so they can be notarized.
+          CODE_SIGN_INJECT_BASE_ENTITLEMENTS: NO
+          ENABLE_DEBUG_DYLIB: NO
+          # Notarization requires a secure timestamp; Xcode only adds one when archiving.
+          OTHER_CODE_SIGN_FLAGS: --timestamp

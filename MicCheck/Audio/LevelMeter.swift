@@ -40,8 +40,8 @@ final class DeviceLevelMeter {
 
     /// IO callbacks land on `ioQueue`. Start/stop/destroy go through `controlQueue`, never
     /// `ioQueue`: AudioDeviceStop waits for in-flight IO blocks, so calling it from the IO queue deadlocks.
-    private static let ioQueue = DispatchQueue(label: "dev.bryceadams.MicCheck.meter.io", qos: .userInteractive)
-    private static let controlQueue = DispatchQueue(label: "dev.bryceadams.MicCheck.meter.control", qos: .userInitiated)
+    private nonisolated static let ioQueue = DispatchQueue(label: "dev.bryceadams.MicCheck.meter.io", qos: .userInteractive)
+    private nonisolated static let controlQueue = DispatchQueue(label: "dev.bryceadams.MicCheck.meter.control", qos: .userInitiated)
 
     init(deviceID: AudioDeviceID) {
         self.deviceID = deviceID
