@@ -28,8 +28,10 @@ targets:
         CFBundleName: Mic Check
         CFBundleDisplayName: Mic Check
         LSUIElement: true
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSApplicationCategoryType: public.app-category.utilities
-        NSMicrophoneUsageDescription: Mic Check listens to your input devices only to show live level meters. Audio is never recorded or stored.
+        NSMicrophoneUsageDescription: Mic Check listens to your input devices to show live level meters and, when you run a sound test, plays a short clip back to you. Nothing is saved or sent anywhere.
         NSHumanReadableCopyright: © 2026 Bryce Adams
     entitlements:
       path: MicCheck/Resources/MicCheck.entitlements

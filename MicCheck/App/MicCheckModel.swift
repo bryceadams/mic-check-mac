@@ -4,9 +4,6 @@ import CoreAudio
 import Foundation
 import Observation
 import ServiceManagement
-import os
-
-private let log = Logger(subsystem: "dev.bryceadams.MicCheck", category: "model")
 
 /// Coordinates devices, meters, lock behaviour and preferences for the UI.
 @MainActor
@@ -135,7 +132,6 @@ final class MicCheckModel {
     }
 
     private func syncMeters() {
-        DebugLog.write("syncMeters: access=\(self.microphoneAccess.rawValue) panelOpen=\(self.panelIsOpen) visible=\(self.visibleDevices.map { "\($0.systemName)#\($0.id)" }.joined(separator: ", ")) default=\(self.audio.defaultInputID ?? 0)")
         guard microphoneAccess == .authorized else { return }
         // Meter every visible device while open, except Continuity (iPhone) mics unless they are the current input:
         // opening a tap on one wakes the phone's connection.

@@ -1,8 +1,8 @@
 import Foundation
 import os
 
-/// Minimal file logger for diagnosing audio issues. Writes to the sandbox container's
-/// Library/Logs/MicCheck.log alongside the unified log.
+/// Minimal file logger for diagnosing audio issues: ~/Library/Logs/MicCheck.log, capped at 512 KB.
+/// Only failures and one-off events are logged; nothing per-buffer or per-panel-open.
 enum DebugLog {
     private static let osLog = Logger(subsystem: "dev.bryceadams.MicCheck", category: "debug")
     private static let queue = DispatchQueue(label: "dev.bryceadams.MicCheck.log")
@@ -17,6 +17,9 @@ enum DebugLog {
         osLog.notice("\(message)")
         let line = "\(stamp.string(from: Date())) \(message)\n"
         queue.async {
+            if let size = try? FileManager.default.attributesOfItem(atPath: url.path)[.size] as? Int, size > 512 * 1024 {
+                try? FileManager.default.removeItem(at: url)
+            }
             if let h = try? FileHandle(forWritingTo: url) {
                 h.seekToEndOfFile(); h.write(Data(line.utf8)); try? h.close()
             } else {
