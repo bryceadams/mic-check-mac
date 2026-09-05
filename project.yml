@@ -41,6 +41,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.bryceadams.MicCheck
+        PRODUCT_NAME: Mic Check
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         GENERATE_INFOPLIST_FILE: NO
       configs:

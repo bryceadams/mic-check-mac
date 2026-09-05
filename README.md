@@ -38,7 +38,7 @@ Requirements: Xcode 16 or later and [XcodeGen](https://github.com/yonaskolb/Xcod
 ```bash
 xcodegen generate
 xcodebuild -project MicCheck.xcodeproj -scheme MicCheck -configuration Debug -derivedDataPath build build
-open build/Build/Products/Debug/MicCheck.app
+open "build/Build/Products/Debug/Mic Check.app"
 ```
 
 The project is described in `project.yml`; the generated `.xcodeproj` is not checked in. Signing uses a Developer ID identity, so set your own team in `project.yml` or switch `CODE_SIGN_STYLE` to `Automatic` to build with a development certificate.

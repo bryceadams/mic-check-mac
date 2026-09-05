@@ -17,7 +17,7 @@ SKIP_NOTARIZE=0
 VERSION=$(grep -E '^\s*MARKETING_VERSION:' project.yml | sed -E 's/.*"([^"]+)".*/\1/')
 BUILD_NUMBER=$(grep -E '^\s*CURRENT_PROJECT_VERSION:' project.yml | sed -E 's/.*"([^"]+)".*/\1/')
 DIST="dist"
-APP="build/Build/Products/Release/MicCheck.app"
+APP="build/Build/Products/Release/Mic Check.app"
 DMG="$DIST/Mic-Check-$VERSION.dmg"
 ZIP="$DIST/Mic-Check-$VERSION.zip"
 
@@ -75,7 +75,7 @@ tell application "Finder"
     set arrangement of opts to not arranged
     set icon size of opts to 128
     set text size of opts to 13
-    set position of item "MicCheck.app" of container window to {150, 170}
+    set position of item "Mic Check.app" of container window to {150, 170}
     set position of item "Applications" of container window to {410, 170}
     close
     open
