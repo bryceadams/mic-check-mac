@@ -19,10 +19,6 @@ struct SettingsView: View {
                 }
                 Toggle("Hide virtual and aggregate devices", isOn: $prefs.hideVirtualDevices)
                     .onChange(of: prefs.hideVirtualDevices) { _, _ in model.preferencesDidChange() }
-                Section("Keyboard shortcuts") {
-                    LabeledContent("Cycle input", value: "⌃⌥⌘M")
-                    LabeledContent("Toggle input lock", value: "⌃⌥⌘L")
-                }
             }
             .formStyle(.grouped)
             .tabItem { Label("General", systemImage: "gear") }

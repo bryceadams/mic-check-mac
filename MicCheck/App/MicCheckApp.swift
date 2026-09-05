@@ -3,17 +3,14 @@ import SwiftUI
 @main
 struct MicCheckApp: App {
     @State private var model = MicCheckModel()
-    @State private var hotKeys: HotKeyManager?
 
     var body: some Scene {
         MenuBarExtra {
             MenuPanelView()
                 .environment(model)
-                .onAppear { installHotKeysIfNeeded() }
         } label: {
             MenuBarLabel()
                 .environment(model)
-                .task { installHotKeysIfNeeded() }
         }
         .menuBarExtraStyle(.window)
 
@@ -22,15 +19,6 @@ struct MicCheckApp: App {
         }
     }
 
-    private func installHotKeysIfNeeded() {
-        guard hotKeys == nil else { return }
-        hotKeys = HotKeyManager { action in
-            switch action {
-            case .cycleInput: model.cycleToNextDevice()
-            case .toggleLock: model.toggleLock()
-            }
-        }
-    }
 }
 
 private struct MenuBarLabel: View {

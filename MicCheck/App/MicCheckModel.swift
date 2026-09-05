@@ -49,13 +49,6 @@ final class MicCheckModel {
         syncMenuBarMeter()
     }
 
-    func cycleToNextDevice() {
-        let list = visibleDevices
-        guard !list.isEmpty else { return }
-        let idx = list.firstIndex { isCurrent($0) } ?? -1
-        select(list[(idx + 1) % list.count])
-    }
-
     // MARK: Lock
 
     var isLocked: Bool { prefs.lockInput }
@@ -64,8 +57,6 @@ final class MicCheckModel {
         prefs.lockInput = locked
         prefs.lockedDeviceUID = locked ? currentDevice?.uid : nil
     }
-
-    func toggleLock() { setLocked(!isLocked) }
 
     private func enforceLockIfNeeded() {
         guard prefs.lockInput, let uid = prefs.lockedDeviceUID else { syncMenuBarMeter(); return }
