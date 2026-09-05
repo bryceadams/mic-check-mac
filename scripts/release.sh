@@ -53,10 +53,54 @@ fi
 
 step "Building DMG"
 STAGE=$(mktemp -d)
+RW_DMG="$DIST/rw.dmg"
+MOUNT="/Volumes/Mic Check"
 cp -R "$APP" "$STAGE/"
 ln -s /Applications "$STAGE/Applications"
-hdiutil create -volname "Mic Check" -srcfolder "$STAGE" -ov -format UDZO -quiet "$DMG"
+# Build read-write first so the Finder window layout and volume icon can be set, then compress.
+hdiutil create -volname "Mic Check" -srcfolder "$STAGE" -ov -format UDRW -quiet "$RW_DMG"
 rm -rf "$STAGE"
+hdiutil detach "$MOUNT" -quiet 2>/dev/null || true
+hdiutil attach "$RW_DMG" -mountpoint "$MOUNT" -nobrowse -quiet
+# Finder layout first. Do not use Finder's "update" here: it clears the volume icon set below.
+osascript <<APPLESCRIPT || echo "Finder layout skipped (automation permission?)"
+tell application "Finder"
+  tell disk "Mic Check"
+    open
+    set current view of container window to icon view
+    set toolbar visible of container window to false
+    set statusbar visible of container window to false
+    set the bounds of container window to {400, 200, 960, 560}
+    set opts to the icon view options of container window
+    set arrangement of opts to not arranged
+    set icon size of opts to 128
+    set text size of opts to 13
+    set position of item "MicCheck.app" of container window to {150, 170}
+    set position of item "Applications" of container window to {410, 170}
+    close
+    open
+    delay 1
+    close
+  end tell
+end tell
+APPLESCRIPT
+# Volume icon: the icns at the root plus the custom-icon flag on the root directory.
+cp scripts/dmg/VolumeIcon.icns "$MOUNT/.VolumeIcon.icns"
+SetFile -a C "$MOUNT"
+sync
+hdiutil detach "$MOUNT" -quiet
+hdiutil convert "$RW_DMG" -format UDZO -imagekey zlib-level=9 -ov -quiet -o "$DMG"
+rm -f "$RW_DMG"
+# Give the .dmg file itself the icon for local copies (resource fork; does not survive a web download).
+# Work on a temp copy: sips -i writes an icon resource into the file it is given.
+if command -v Rez >/dev/null 2>&1; then
+  ICON_TMP=$(mktemp -d)
+  cp scripts/dmg/VolumeIcon.icns "$ICON_TMP/icon.icns"
+  if sips -i "$ICON_TMP/icon.icns" >/dev/null 2>&1 && DeRez -only icns "$ICON_TMP/icon.icns" > "$ICON_TMP/icon.rsrc" 2>/dev/null; then
+    Rez -append "$ICON_TMP/icon.rsrc" -o "$DMG" && SetFile -a C "$DMG" || true
+  fi
+  rm -rf "$ICON_TMP"
+fi
 codesign --sign "$IDENTITY" --timestamp "$DMG"
 
 if (( SKIP_NOTARIZE == 0 )); then
