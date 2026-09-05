@@ -30,8 +30,9 @@ final class MicCheckModel {
     var visibleDevices: [InputDevice] {
         audio.devices.filter { device in
             if prefs.hideVirtualDevices && (device.transport.isVirtual || device.transport == .aggregate) { return false }
-            // iPhone (Continuity Camera) mics are hidden unless enabled, except when one is the current input.
-            if !prefs.showContinuityDevices && device.transport.isContinuity && !isCurrent(device) { return false }
+            // iPhone (Continuity Camera) mics appear whenever a phone is nearby and wake it when tapped; never list them
+            // unless one is already the current input.
+            if device.transport.isContinuity && !isCurrent(device) { return false }
             if prefs.isHidden(device) { return false }
             return true
         }

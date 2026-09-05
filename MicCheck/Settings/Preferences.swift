@@ -10,7 +10,6 @@ final class Preferences {
     var showDeviceNameInMenuBar: Bool { didSet { defaults.set(showDeviceNameInMenuBar, forKey: "showDeviceNameInMenuBar") } }
     var showLevelInMenuBar: Bool { didSet { defaults.set(showLevelInMenuBar, forKey: "showLevelInMenuBar") } }
     var hideVirtualDevices: Bool { didSet { defaults.set(hideVirtualDevices, forKey: "hideVirtualDevices") } }
-    var showContinuityDevices: Bool { didSet { defaults.set(showContinuityDevices, forKey: "showContinuityDevices") } }
     var lockInput: Bool { didSet { defaults.set(lockInput, forKey: "lockInput") } }
     var lockedDeviceUID: String? { didSet { defaults.set(lockedDeviceUID, forKey: "lockedDeviceUID") } }
     private(set) var deviceNames: [String: String] { didSet { defaults.set(deviceNames, forKey: "deviceNames") } }
@@ -21,7 +20,6 @@ final class Preferences {
         showDeviceNameInMenuBar = defaults.bool(forKey: "showDeviceNameInMenuBar")
         showLevelInMenuBar = defaults.bool(forKey: "showLevelInMenuBar")
         hideVirtualDevices = defaults.bool(forKey: "hideVirtualDevices")
-        showContinuityDevices = defaults.bool(forKey: "showContinuityDevices")
         lockInput = defaults.bool(forKey: "lockInput")
         lockedDeviceUID = defaults.string(forKey: "lockedDeviceUID")
         deviceNames = defaults.dictionary(forKey: "deviceNames") as? [String: String] ?? [:]

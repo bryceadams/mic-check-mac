@@ -16,7 +16,7 @@ Switching mics on a Mac means a trip to System Settings, and even then you can't
 - **Live level meters.** A meter on every row while the panel is open, plus a large meter and gain slider for the current input. The menu bar icon fills with level too.
 - **Sound test.** Click **Test** to record five seconds and hear it played back through your speakers. Press and hold to record for as long as you hold, up to a minute.
 - **Lock input.** Stop macOS or other apps from silently switching your mic. When locked, Mic Check switches it straight back.
-- **Rename and hide devices.** Right-click any row to give a device a friendly name ("Lapel mic" instead of "USB Audio Device") or hide it. Virtual devices from meeting apps are hidden by default, as is the iPhone Continuity mic.
+- **Rename and hide devices.** Right-click any row to give a device a friendly name ("Lapel mic" instead of "USB Audio Device") or hide it. Virtual devices from meeting apps are hidden by default, and the iPhone Continuity mic is never listed.
 - **Keyboard shortcuts.** ⌃⌥⌘M cycles to the next input. ⌃⌥⌘L toggles the lock.
 - **Stays out of the way.** No Dock icon, no windows, and no microphone use while the panel is closed.
 

@@ -43,10 +43,6 @@ struct DeviceRowView: View {
                         Text("Bluetooth input lowers output quality")
                             .font(.system(size: 11))
                             .foregroundStyle(.secondary)
-                    } else if device.transport.isContinuity && !current {
-                        Text("Level shown when selected")
-                            .font(.system(size: 11))
-                            .foregroundStyle(.secondary)
                     }
                 }
                 Spacer(minLength: 8)
