@@ -49,7 +49,7 @@ The project is described in `project.yml`; the generated `.xcodeproj` is not che
 
 Device enumeration, default-input switching, and gain use the CoreAudio HAL directly. Each level meter is a CoreAudio IO proc on its device, started only while the panel is open. The dropdown is a SwiftUI `MenuBarExtra` in window style. There are no third-party dependencies.
 
-The product spec, including the decisions log, is in [SPEC.md](SPEC.md). Design mockups live in [design](design).
+Design mockups live in [design](design).
 
 ## License
 
