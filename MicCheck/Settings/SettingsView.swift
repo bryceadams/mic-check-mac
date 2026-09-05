@@ -19,6 +19,12 @@ struct SettingsView: View {
                 }
                 Toggle("Hide virtual and aggregate devices", isOn: $prefs.hideVirtualDevices)
                     .onChange(of: prefs.hideVirtualDevices) { _, _ in model.preferencesDidChange() }
+                VStack(alignment: .leading, spacing: 2) {
+                    Toggle("Show iPhone microphone", isOn: $prefs.showContinuityDevices)
+                        .onChange(of: prefs.showContinuityDevices) { _, _ in model.preferencesDidChange() }
+                    Text("Your iPhone appears as a Continuity Camera input whenever it's nearby.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
                 Section("Keyboard shortcuts") {
                     LabeledContent("Cycle input", value: "⌃⌥⌘M")
                     LabeledContent("Toggle input lock", value: "⌃⌥⌘L")

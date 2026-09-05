@@ -28,6 +28,8 @@ final class DeviceLevelMeter {
         var peak: Float = 0
         var clip = false
         var buffers = 0
+        var bytes = 0
+        var maxAbs: Float = 0
     }
     private let shared = Shared()
     private var procID: AudioDeviceIOProcID?
@@ -63,6 +65,10 @@ final class DeviceLevelMeter {
                 DebugLog.write("device \(id): create IO proc failed \(status)")
                 return
             }
+            let fmtAddr = CoreAudioHelpers.address(kAudioDevicePropertyStreamFormat, scope: kAudioObjectPropertyScopeInput)
+            if let fmt = CoreAudioHelpers.get(id, fmtAddr, default: AudioStreamBasicDescription()) {
+                DebugLog.write("device \(id): input format \(fmt.mSampleRate)Hz ch=\(fmt.mChannelsPerFrame) bits=\(fmt.mBitsPerChannel) flags=\(String(fmt.mFormatFlags, radix: 16)) bytesPerFrame=\(fmt.mBytesPerFrame)")
+            }
             let startStatus = AudioDeviceStart(id, proc)
             Task { @MainActor [weak self] in
                 guard let self, self.generation == gen, !self.stopped else {
@@ -78,9 +84,11 @@ final class DeviceLevelMeter {
                 DebugLog.write("device \(id): streaming")
                 self.procID = proc
                 self.isRunning = true
-                self.displayTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30.0, repeats: true) { [weak self] _ in
+                let timer = Timer(timeInterval: 1.0 / 30.0, repeats: true) { [weak self] _ in
                     Task { @MainActor in self?.tick() }
                 }
+                RunLoop.main.add(timer, forMode: .common)
+                self.displayTimer = timer
             }
         }
     }
@@ -109,13 +117,22 @@ final class DeviceLevelMeter {
         shared.peak = max(shared.peak, peak)
         shared.clip = shared.clip || peak >= 0.99
         shared.buffers += 1
+        shared.bytes = max(shared.bytes, Int(buffers.first?.mDataByteSize ?? 0))
+        shared.maxAbs = max(shared.maxAbs, peak)
         shared.lock.unlock()
     }
+
+    private var ticks = 0
 
     private func tick() {
         shared.lock.lock()
         let rms = shared.rms, peak = shared.peak, clip = shared.clip, buffers = shared.buffers
         shared.rms = 0; shared.peak = 0; shared.clip = false
+        ticks += 1
+        if ticks % 30 == 0 {
+            DebugLog.write("device \(deviceID): 1s summary buffers=\(buffers) firstBufBytes=\(shared.bytes) maxAbs=\(shared.maxAbs) uiLevel=\(level.rms)")
+            shared.buffers = 0; shared.maxAbs = 0
+        }
         shared.lock.unlock()
 
         if buffers == 0, let startedAt, Date().timeIntervalSince(startedAt) > 4 {

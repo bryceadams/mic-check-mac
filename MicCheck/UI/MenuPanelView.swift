@@ -32,12 +32,9 @@ struct MenuPanelView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .center) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("INPUT").font(.system(size: 11, weight: .semibold)).foregroundStyle(.secondary).kerning(0.3)
-                    Text(model.currentDevice.map { model.prefs.displayName(for: $0) } ?? "No Input")
-                        .font(.system(size: 15, weight: .semibold))
-                        .lineLimit(1)
-                }
+                Text(model.currentDevice.map { model.prefs.displayName(for: $0) } ?? "No Input")
+                    .font(.system(size: 15, weight: .semibold))
+                    .lineLimit(1)
                 Spacer()
                 if model.isLocked {
                     Label("Locked", systemImage: "lock.fill")
@@ -63,22 +60,8 @@ struct MenuPanelView: View {
         .padding(.horizontal, 10).padding(.top, 8).padding(.bottom, 10)
     }
 
-    @ViewBuilder private var soundTestButton: some View {
-        let phase = model.soundTest.phase
-        Button {
-            model.toggleSoundTest()
-        } label: {
-            switch phase {
-            case .recording: Label("Stop", systemImage: "stop.fill")
-            case .playing: Label("Stop", systemImage: "stop.fill")
-            default: Label("Test", systemImage: "waveform")
-            }
-        }
-        .font(.system(size: 11, weight: .medium))
-        .controlSize(.small)
-        .buttonStyle(.bordered)
-        .disabled(model.currentDevice == nil)
-        .help("Record a few seconds from this input and play it back")
+    private var soundTestButton: some View {
+        SoundTestButton()
     }
 
     @ViewBuilder private var soundTestStatus: some View {
@@ -86,9 +69,11 @@ struct MenuPanelView: View {
         case .recording(let elapsed):
             HStack(spacing: 6) {
                 Circle().fill(.red).frame(width: 7, height: 7)
-                Text("Recording… say something")
+                Text(model.soundTest.isHoldRecording ? "Recording… release to play back" : "Recording… say something")
                 Spacer()
-                Text(String(format: "%.0fs", Self.maxDuration - elapsed)).monospacedDigit()
+                Text(model.soundTest.isHoldRecording
+                     ? String(format: "%.0fs", elapsed)
+                     : String(format: "%.0fs", max(0, model.soundTest.maxDuration - elapsed))).monospacedDigit()
             }
             .font(.system(size: 11)).foregroundStyle(.secondary)
         case .playing(let elapsed, let duration):
@@ -101,12 +86,10 @@ struct MenuPanelView: View {
             .font(.system(size: 11)).foregroundStyle(.secondary)
         case .failed(let message):
             Text(message).font(.system(size: 11)).foregroundStyle(.red)
-        case .idle:
+        case .starting, .idle:
             EmptyView()
         }
     }
-
-    private static let maxDuration = SoundTest.maxDuration
 
     private var permissionNotice: some View {
         HStack(spacing: 8) {
@@ -150,6 +133,43 @@ extension MenuPanelView {
                 NSApp.windows.first { $0.identifier?.rawValue.contains("Settings") == true || $0.title.contains("Settings") }?.makeKeyAndOrderFront(nil)
             }
         }
+    }
+}
+
+/// Bordered button that distinguishes tap from press-and-hold. Tap: 5s clip. Hold: record until release.
+private struct SoundTestButton: View {
+    @Environment(MicCheckModel.self) private var model
+    @State private var pressStart: Date?
+
+    var body: some View {
+        let phase = model.soundTest.phase
+        let pressing = pressStart != nil
+        Group {
+            switch phase {
+            case .starting: Label("Starting", systemImage: "waveform")
+            case .recording, .playing: Label("Stop", systemImage: "stop.fill")
+            default: Label("Test", systemImage: "waveform")
+            }
+        }
+        .font(.system(size: 11, weight: .medium))
+        .padding(.horizontal, 8).padding(.vertical, 3)
+        .background(Color.primary.opacity(pressing ? 0.16 : 0.08), in: RoundedRectangle(cornerRadius: 5))
+        .contentShape(RoundedRectangle(cornerRadius: 5))
+        .opacity(model.currentDevice == nil ? 0.4 : 1)
+        .gesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in
+                    guard pressStart == nil, model.currentDevice != nil else { return }
+                    pressStart = Date()
+                    model.soundTestPressed()
+                }
+                .onEnded { _ in
+                    guard let start = pressStart else { return }
+                    pressStart = nil
+                    model.soundTestReleased(heldFor: Date().timeIntervalSince(start))
+                }
+        )
+        .help("Click to record 5 seconds, or hold to record up to a minute. Plays back when done.")
     }
 }
 

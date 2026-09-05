@@ -33,6 +33,8 @@ final class MicCheckModel {
     var visibleDevices: [InputDevice] {
         audio.devices.filter { device in
             if prefs.hideVirtualDevices && (device.transport.isVirtual || device.transport == .aggregate) { return false }
+            // iPhone (Continuity Camera) mics are hidden unless enabled, except when one is the current input.
+            if !prefs.showContinuityDevices && device.transport.isContinuity && !isCurrent(device) { return false }
             if prefs.isHidden(device) { return false }
             return true
         }
@@ -91,9 +93,35 @@ final class MicCheckModel {
         syncMeters()
     }
 
-    func toggleSoundTest() {
+    private var pressStartedRecording = false
+
+    /// Mouse down on the Test button. Starts a hold recording when idle; otherwise waits for release.
+    func soundTestPressed() {
+        pressStartedRecording = false
         guard let id = audio.defaultInputID else { return }
-        requestMicrophoneAccessIfNeeded { [weak self] in self?.soundTest.toggle(deviceID: id) }
+        switch soundTest.phase {
+        case .idle, .failed:
+            pressStartedRecording = true
+            requestMicrophoneAccessIfNeeded { [weak self] in
+                self?.soundTest.startRecording(deviceID: id, maxDuration: SoundTest.holdMaxDuration, hold: true)
+            }
+        default:
+            break
+        }
+    }
+
+    /// Mouse up on the Test button. A short press is a tap (5s clip); a long press ends the hold recording.
+    func soundTestReleased(heldFor held: TimeInterval) {
+        defer { pressStartedRecording = false }
+        if pressStartedRecording {
+            if held < 0.4 { soundTest.limit(to: SoundTest.tapDuration) } else { soundTest.finishAndPlay() }
+            return
+        }
+        switch soundTest.phase {
+        case .recording: soundTest.finishAndPlay()
+        case .playing: soundTest.stopPlayback()
+        default: break
+        }
     }
 
     func meter(for device: InputDevice) -> DeviceLevelMeter? {
