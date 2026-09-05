@@ -1,0 +1,43 @@
+name: MicCheck
+options:
+  bundleIdPrefix: dev.bryceadams
+  deploymentTarget:
+    macOS: "15.0"
+  xcodeVersion: "26.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: XQL374L3KC
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: "Developer ID Application"
+    PROVISIONING_PROFILE_SPECIFIER: ""
+    ENABLE_HARDENED_RUNTIME: YES
+targets:
+  MicCheck:
+    type: application
+    platform: macOS
+    sources:
+      - path: MicCheck
+        excludes: ["Resources/Info.plist"]
+    info:
+      path: MicCheck/Resources/Info.plist
+      properties:
+        CFBundleName: Mic Check
+        CFBundleDisplayName: Mic Check
+        LSUIElement: true
+        LSApplicationCategoryType: public.app-category.utilities
+        NSMicrophoneUsageDescription: Mic Check listens to your input devices only to show live level meters. Audio is never recorded or stored.
+        NSHumanReadableCopyright: © 2026 Bryce Adams
+    entitlements:
+      path: MicCheck/Resources/MicCheck.entitlements
+      properties:
+        com.apple.security.app-sandbox: false
+        com.apple.security.device.audio-input: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.bryceadams.MicCheck
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        GENERATE_INFOPLIST_FILE: NO
