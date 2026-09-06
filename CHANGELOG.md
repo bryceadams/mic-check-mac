@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2
+
+- Check for Updates moved out of the menu bar panel. It lives in Settings, alongside the automatic-update toggle.
+
 ## 0.1.1
 
 - Automatic updates. Mic Check now checks for new versions once a day and offers to install them; there's also Check for Updates in the panel and a toggle in Settings.

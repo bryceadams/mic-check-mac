@@ -3,6 +3,18 @@
     <channel>
         <title>Mic Check</title>
         <item>
+            <title>0.1.2</title>
+            <pubDate>Sun, 06 Sep 2026 11:30:46 +1000</pubDate>
+            <sparkle:version>3</sparkle:version>
+            <sparkle:shortVersionString>0.1.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[<ul>
+<li>Check for Updates moved out of the menu bar panel. It lives in Settings, alongside the automatic-update toggle.</li>
+</ul>
+]]></description>
+            <enclosure url="https://github.com/bryceadams/mic-check-mac/releases/download/v0.1.2/Mic-Check-0.1.2.dmg" length="4712176" type="application/octet-stream" sparkle:edSignature="TQQgWG7AApVntR80khJMrP57XAuQPKw/3RAEcSVRNMXn//5VaIwnt90j5vGHn0QHUC/2u1gFbLfRnfabn//OCQ=="/>
+        </item>
+        <item>
             <title>0.1.1</title>
             <pubDate>Sun, 06 Sep 2026 11:22:00 +1000</pubDate>
             <sparkle:version>2</sparkle:version>
