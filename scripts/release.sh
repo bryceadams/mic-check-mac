@@ -179,6 +179,8 @@ if (( PUBLISH == 1 )); then
   git diff --cached --quiet || git commit -q -m "Release $VERSION"
   git push -q origin main
   gh release create "v$VERSION" "$DMG" --repo "$REPO" --title "Mic Check $VERSION" --notes-file "$NOTES_MD"
+  # Fixed-name copy so the README's "latest" download link never changes.
+  cp "$DMG" "$DIST/Mic-Check.dmg" && gh release upload "v$VERSION" "$DIST/Mic-Check.dmg" --repo "$REPO" --clobber
   gh release view "v$VERSION" --repo "$REPO" --json url -q .url
 fi
 

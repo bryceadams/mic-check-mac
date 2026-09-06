@@ -7,6 +7,12 @@
 <p align="center">A small macOS menu bar app for switching your microphone and seeing that it actually hears you.</p>
 
 <p align="center">
+  <a href="https://github.com/bryceadams/mic-check-mac/releases/latest/download/Mic-Check.dmg">
+    <img src="docs/download-button.svg" width="240" height="56" alt="Download Mic Check for macOS">
+  </a>
+</p>
+
+<p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/panel-dark.png">
     <img src="docs/panel-light.png" width="400" alt="Mic Check panel showing the current input with a live level meter, gain slider, a list of input devices each with its own meter, and a lock toggle">
@@ -29,7 +35,7 @@ Switching mics on a Mac means a trip to System Settings, and even then you can't
 
 ## Install
 
-Download the latest DMG from [Releases](https://github.com/bryceadams/mic-check-mac/releases), open it, and drag Mic Check to Applications. The app is signed and notarized, so it opens without warnings.
+[Download the latest DMG](https://github.com/bryceadams/mic-check-mac/releases/latest/download/Mic-Check.dmg), open it, and drag Mic Check to Applications. Older versions are under [Releases](https://github.com/bryceadams/mic-check-mac/releases). The app is signed and notarized, so it opens without warnings.
 
 Requires macOS 15 or later. On first open of the panel, macOS asks for microphone access. That's needed for the level meters; nothing is recorded or stored.
 
