@@ -3,7 +3,6 @@ import SwiftUI
 /// The dropdown shown from the menu bar item.
 struct MenuPanelView: View {
     @Environment(MicCheckModel.self) private var model
-    @Environment(UpdateController.self) private var updates: UpdateController?
     @Environment(\.openSettings) private var openSettings
 
     var body: some View {
@@ -124,7 +123,6 @@ struct MenuPanelView: View {
         VStack(spacing: 0) {
             MenuActionRow(title: "Settings…", shortcut: "⌘,") { showSettings() }
             MenuActionRow(title: "Sound Settings…", systemImage: "chevron.right") { model.openSoundSettings() }
-            MenuActionRow(title: "Check for Updates…") { updates?.checkForUpdates() }
             MenuActionRow(title: "Quit Mic Check", shortcut: "⌘Q") { NSApp.terminate(nil) }
         }
     }
