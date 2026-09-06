@@ -1,0 +1,19 @@
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>Mic Check</title>
+        <item>
+            <title>0.1.1</title>
+            <pubDate>Sun, 06 Sep 2026 11:22:00 +1000</pubDate>
+            <sparkle:version>2</sparkle:version>
+            <sparkle:shortVersionString>0.1.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[<ul>
+<li>Automatic updates. Mic Check now checks for new versions once a day and offers to install them; there&#x27;s also Check for Updates in the panel and a toggle in Settings.</li>
+<li>The &quot;Lowers output quality&quot; hint on Bluetooth devices now appears only for headsets and earbuds, not for input-only devices such as wireless mic transmitters.</li>
+</ul>
+]]></description>
+            <enclosure url="https://github.com/bryceadams/mic-check-mac/releases/download/v0.1.1/Mic-Check-0.1.1.dmg" length="4712606" type="application/octet-stream" sparkle:edSignature="07vzsX99xJzSXAlOsBUYcQ4hi9VGgfrvLYiOBP2rvH2l5X93iN+I1nXT52T5eXtJinZh1+Y9h2Sf533zYiw6DQ=="/>
+        </item>
+    </channel>
+</rss>
