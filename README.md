@@ -13,10 +13,7 @@
 </p>
 
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/panel-dark.png">
-    <img src="docs/panel-light.png" width="400" alt="Mic Check panel showing the current input with a live level meter, gain slider, a list of input devices each with its own meter, and a lock toggle">
-  </picture>
+  <img src="docs/hero.png" width="840" alt="Mic Check open from the menu bar: the current input with a live level meter and gain slider, a list of input devices each with its own meter, and a lock toggle">
 </p>
 
 ---
@@ -59,7 +56,7 @@ The project is described in `project.yml`; the generated `.xcodeproj` is not che
 
 `scripts/release.sh` builds a Release binary, notarizes it, packages a DMG, and regenerates `appcast.xml`, the feed installed copies poll for updates. With `--publish` it also creates the GitHub release. See the comments at the top of that script for the one-time credential setup.
 
-The README screenshots are rendered by the app itself from example data: run the built binary with `--render-screenshots <directory>`.
+The app can render its own panel from example data for screenshots: run the built binary with `--render-screenshots <directory>`.
 
 ## How it works
 
