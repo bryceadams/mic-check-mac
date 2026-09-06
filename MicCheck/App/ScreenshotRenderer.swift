@@ -8,11 +8,44 @@ import SwiftUI
 enum ScreenshotRenderer {
     static func runIfRequested() -> Bool {
         let args = CommandLine.arguments
+        if let i = args.firstIndex(of: "--render-menubar-icon"), i + 1 < args.count {
+            let dir = URL(fileURLWithPath: args[i + 1], isDirectory: true)
+            try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            renderMenuBarIcons(to: dir)
+            exit(0)
+        }
         guard let i = args.firstIndex(of: "--render-screenshots"), i + 1 < args.count else { return false }
         let dir = URL(fileURLWithPath: args[i + 1], isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         render(to: dir)
         exit(0)
+    }
+
+    /// Exports the menu bar glyph in several states, as black and white PNGs at 1x/2x/4x and a large size.
+    private static func renderMenuBarIcons(to dir: URL) {
+        let states: [(String, AudioLevel, Bool)] = [
+            ("idle", .silent, false),
+            ("level", AudioLevel(rms: 0.3, peak: 0.5, clipped: false), false),
+            ("clipping", AudioLevel(rms: 1, peak: 1, clipped: true), false),
+            ("locked", .silent, true),
+        ]
+        for (name, level, locked) in states {
+            let template = MenuBarIcon.image(level: level, locked: locked, showLevel: true)
+            for (suffix, pixels) in [("@1x", 18), ("@2x", 36), ("@4x", 72), ("-512", 512)] {
+                for (tone, color) in [("black", NSColor.black), ("white", NSColor.white)] {
+                    let tinted = NSImage(size: NSSize(width: pixels, height: pixels), flipped: false) { rect in
+                        template.draw(in: rect)
+                        color.set()
+                        rect.fill(using: .sourceIn) // recolor the template's alpha
+                        return true
+                    }
+                    guard let tiff = tinted.tiffRepresentation, let rep = NSBitmapImageRep(data: tiff),
+                          let png = rep.representation(using: .png, properties: [:]) else { continue }
+                    try? png.write(to: dir.appendingPathComponent("menubar-\(name)-\(tone)\(suffix).png"))
+                }
+            }
+        }
+        print("wrote menu bar icons to \(dir.path)")
     }
 
     private static func render(to dir: URL) {
