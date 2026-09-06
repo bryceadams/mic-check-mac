@@ -43,10 +43,25 @@ grep -q "^## $VERSION\b" CHANGELOG.md || { echo "CHANGELOG.md has no '## $VERSIO
 xcodegen generate >/dev/null
 xcodebuild -project MicCheck.xcodeproj -scheme MicCheck -resolvePackageDependencies -derivedDataPath build >/dev/null 2>&1
 xcodebuild -project MicCheck.xcodeproj -scheme MicCheck -configuration Release \
-  -derivedDataPath build clean build 2>&1 | grep -E "error:|warning:|BUILD" | grep -v appintents || true
+  -destination "generic/platform=macOS" -derivedDataPath build clean build 2>&1 | grep -E "error:|warning:|BUILD" | grep -v appintents || true
 [[ -d "$APP" ]] || { echo "Build failed: $APP missing"; exit 1; }
 
+step "Re-signing Sparkle's nested components"
+# Xcode signs the framework but leaves Autoupdate, Updater.app and the XPC services ad-hoc signed,
+# which notarization rejects. Sign inside-out with the Developer ID, hardened runtime and a timestamp.
+SPARKLE="$APP/Contents/Frameworks/Sparkle.framework/Versions/B"
+codesign -f -s "$IDENTITY" -o runtime --timestamp "$SPARKLE/XPCServices/Installer.xpc"
+codesign -f -s "$IDENTITY" -o runtime --timestamp --preserve-metadata=entitlements "$SPARKLE/XPCServices/Downloader.xpc"
+codesign -f -s "$IDENTITY" -o runtime --timestamp "$SPARKLE/Autoupdate"
+codesign -f -s "$IDENTITY" -o runtime --timestamp "$SPARKLE/Updater.app"
+codesign -f -s "$IDENTITY" -o runtime --timestamp "$APP/Contents/Frameworks/Sparkle.framework"
+codesign -f -s "$IDENTITY" -o runtime --timestamp --entitlements MicCheck/Resources/MicCheck.entitlements "$APP"
+for nested in "$SPARKLE/Autoupdate" "$SPARKLE/Updater.app" "$SPARKLE/XPCServices/Installer.xpc" "$SPARKLE/XPCServices/Downloader.xpc" "$APP/Contents/Frameworks/Sparkle.framework" "$APP"; do
+  if codesign -dv "$nested" 2>&1 | grep -q "adhoc"; then echo "still ad-hoc signed: $nested"; exit 1; fi
+done
+
 step "Verifying signature and entitlements"
+lipo -archs "$APP/Contents/MacOS/Mic Check" | grep -q "x86_64" || { echo "Not a universal binary"; exit 1; }
 codesign --verify --deep --strict --verbose=1 "$APP"
 if codesign -d --entitlements :- "$APP" 2>/dev/null | grep -q "get-task-allow"; then
   echo "Release build still carries get-task-allow; refusing to notarize."; exit 1
@@ -61,7 +76,7 @@ if (( SKIP_NOTARIZE == 0 )); then
   xcrun notarytool submit "$ZIP" --keychain-profile "$PROFILE" --wait 2>&1 | tee "$DIST/notary-app.log"
   grep -q "status: Accepted" "$DIST/notary-app.log" || {
     ID=$(grep -m1 -E "^\s*id:" "$DIST/notary-app.log" | awk '{print $2}')
-    [[ -n "$ID" ]] && xcrun notarytool log "$ID" --keychain-profile "$PROFILE"
+    [[ -n "$ID" ]] && xcrun notarytool log "$ID" --keychain-profile "$PROFILE" | tee "$DIST/notary-app-issues.json"
     echo "App notarization failed"; exit 1
   }
   xcrun stapler staple "$APP"
