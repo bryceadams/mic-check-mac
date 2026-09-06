@@ -17,10 +17,10 @@ enum ScreenshotRenderer {
 
     private static func render(to dir: URL) {
         let devices = [
-            InputDevice(id: 1, uid: "demo-usb", systemName: "Wireless Mic Rx", transport: .usb),
-            InputDevice(id: 2, uid: "demo-display", systemName: "Studio Display Microphone", transport: .display),
-            InputDevice(id: 3, uid: "demo-builtin", systemName: "MacBook Pro Microphone", transport: .builtIn),
-            InputDevice(id: 4, uid: "demo-bt", systemName: "AirPods Pro", transport: .bluetooth),
+            InputDevice(id: 1, uid: "demo-usb", systemName: "Wireless Mic Rx", transport: .usb, hasOutput: false),
+            InputDevice(id: 2, uid: "demo-display", systemName: "Studio Display Microphone", transport: .display, hasOutput: true),
+            InputDevice(id: 3, uid: "demo-builtin", systemName: "MacBook Pro Microphone", transport: .builtIn, hasOutput: false),
+            InputDevice(id: 4, uid: "demo-bt", systemName: "AirPods Pro", transport: .bluetooth, hasOutput: true),
         ]
         let model = MicCheckModel()
         model.prefs.rename(devices[0], to: "Lapel Mic")

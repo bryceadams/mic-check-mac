@@ -25,6 +25,7 @@ Switching mics on a Mac means a trip to System Settings, and even then you can't
 - **Lock input.** Stop macOS or other apps from silently switching your mic. When locked, Mic Check switches it straight back.
 - **Rename and hide devices.** Right-click any row to give a device a friendly name ("Lapel mic" instead of "USB Audio Device") or hide it. Virtual devices from meeting apps are hidden by default, and the iPhone Continuity mic is never listed.
 - **Stays out of the way.** No Dock icon, no windows, and no microphone use while the panel is closed.
+- **Updates itself.** Checks once a day and offers new versions in place, via Sparkle. Turn it off in Settings if you prefer.
 
 ## Install
 
@@ -36,11 +37,11 @@ Turn on **Launch at login** in Settings if you want it always there.
 
 ## Privacy
 
-Mic Check has no network access. Audio from your microphones is used only to draw the meters and, when you run a sound test, to play the clip back to you from memory. Nothing is written to disk or sent anywhere. Preferences and device names are stored locally in the app's own defaults.
+Mic Check makes one kind of network request: a daily check of the update feed on GitHub, which you can turn off in Settings. Audio from your microphones is used only to draw the meters and, when you run a sound test, to play the clip back to you from memory. Nothing is written to disk or sent anywhere. Preferences and device names are stored locally in the app's own defaults.
 
 ## Building from source
 
-Requirements: Xcode 16 or later and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`).
+Requirements: Xcode 16 or later and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`). The only dependency, [Sparkle](https://sparkle-project.org), is fetched by Swift Package Manager on first build.
 
 ```bash
 xcodegen generate
@@ -50,13 +51,13 @@ open "build/Build/Products/Debug/Mic Check.app"
 
 The project is described in `project.yml`; the generated `.xcodeproj` is not checked in. Signing uses a Developer ID identity, so set your own team in `project.yml` or switch `CODE_SIGN_STYLE` to `Automatic` to build with a development certificate.
 
-`scripts/release.sh` builds a Release binary, notarizes it, and packages a DMG. See the comments at the top of that script for the one-time notarization credential setup.
+`scripts/release.sh` builds a Release binary, notarizes it, packages a DMG, and regenerates `appcast.xml`, the feed installed copies poll for updates. With `--publish` it also creates the GitHub release. See the comments at the top of that script for the one-time credential setup.
 
 The README screenshots are rendered by the app itself from example data: run the built binary with `--render-screenshots <directory>`.
 
 ## How it works
 
-Device enumeration, default-input switching, and gain use the CoreAudio HAL directly. Each level meter is a CoreAudio IO proc on its device, started only while the panel is open. The dropdown is a SwiftUI `MenuBarExtra` in window style. There are no third-party dependencies.
+Device enumeration, default-input switching, and gain use the CoreAudio HAL directly. Each level meter is a CoreAudio IO proc on its device, started only while the panel is open. The dropdown is a SwiftUI `MenuBarExtra` in window style. Sparkle handles updates; there are no other dependencies.
 
 ## License
 

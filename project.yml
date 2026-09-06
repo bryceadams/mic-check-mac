@@ -8,17 +8,23 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "0.1.0"
-    CURRENT_PROJECT_VERSION: "1"
+    MARKETING_VERSION: "0.1.1"
+    CURRENT_PROJECT_VERSION: "2"
     DEVELOPMENT_TEAM: XQL374L3KC
     CODE_SIGN_STYLE: Manual
     CODE_SIGN_IDENTITY: "Developer ID Application"
     PROVISIONING_PROFILE_SPECIFIER: ""
     ENABLE_HARDENED_RUNTIME: YES
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: 2.6.0
 targets:
   MicCheck:
     type: application
     platform: macOS
+    dependencies:
+      - package: Sparkle
     sources:
       - path: MicCheck
         excludes: ["Resources/Info.plist"]
@@ -28,6 +34,10 @@ targets:
         CFBundleName: Mic Check
         CFBundleDisplayName: Mic Check
         LSUIElement: true
+        SUFeedURL: https://raw.githubusercontent.com/bryceadams/mic-check-mac/main/appcast.xml
+        SUPublicEDKey: bo1akQAFQk/gopzGnahoq89UHTFl9l71jVnhGISVgIY=
+        SUEnableAutomaticChecks: true
+        SUScheduledCheckInterval: 86400
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSApplicationCategoryType: public.app-category.utilities
@@ -51,3 +61,6 @@ targets:
           ENABLE_DEBUG_DYLIB: NO
           # Notarization requires a secure timestamp; Xcode only adds one when archiving.
           OTHER_CODE_SIGN_FLAGS: --timestamp
+          # Universal binary so Intel Macs on macOS 15 can install and update.
+          ARCHS: arm64 x86_64
+          ONLY_ACTIVE_ARCH: NO

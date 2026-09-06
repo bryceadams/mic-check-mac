@@ -1,8 +1,12 @@
 #!/bin/zsh
 # Build, sign, notarize, staple, and package Mic Check as a DMG.
 #
-#   scripts/release.sh                 full release (needs notarytool profile "MicCheck-Notary")
-#   scripts/release.sh --skip-notarize build + DMG only, for testing the pipeline
+#   scripts/release.sh                 build, notarize, DMG, appcast (nothing published)
+#   scripts/release.sh --publish       ...then create the GitHub release and push appcast.xml
+#   scripts/release.sh --skip-notarize build + DMG + appcast only, for testing the pipeline
+#
+# Sparkle: the EdDSA private key lives in the login keychain (generate_keys); the public key is
+# SUPublicEDKey in project.yml. appcast.xml at the repo root is what shipped apps poll.
 #
 # One-time credential setup (app-specific password from appleid.apple.com):
 #   xcrun notarytool store-credentials "MicCheck-Notary" --apple-id "you@example.com" --team-id XQL374L3KC
@@ -12,7 +16,15 @@ cd "$(dirname "$0")/.."
 PROFILE="MicCheck-Notary"
 IDENTITY="Developer ID Application: UJU Pty Ltd (XQL374L3KC)"
 SKIP_NOTARIZE=0
-[[ "${1:-}" == "--skip-notarize" ]] && SKIP_NOTARIZE=1
+PUBLISH=0
+for arg in "$@"; do
+  case "$arg" in
+    --skip-notarize) SKIP_NOTARIZE=1 ;;
+    --publish) PUBLISH=1 ;;
+  esac
+done
+REPO="bryceadams/mic-check-mac"
+SPARKLE_BIN="build/SourcePackages/artifacts/sparkle/Sparkle/bin"
 
 VERSION=$(grep -E '^\s*MARKETING_VERSION:' project.yml | sed -E 's/.*"([^"]+)".*/\1/')
 BUILD_NUMBER=$(grep -E '^\s*CURRENT_PROJECT_VERSION:' project.yml | sed -E 's/.*"([^"]+)".*/\1/')
@@ -24,7 +36,12 @@ ZIP="$DIST/Mic-Check-$VERSION.zip"
 step() { print -P "\n%F{cyan}==> $1%f"; }
 
 step "Generating project and building Release $VERSION ($BUILD_NUMBER)"
+if gh release view "v$VERSION" --repo "$REPO" >/dev/null 2>&1; then
+  echo "v$VERSION is already published; bump MARKETING_VERSION and CURRENT_PROJECT_VERSION in project.yml"; exit 1
+fi
+grep -q "^## $VERSION\b" CHANGELOG.md || { echo "CHANGELOG.md has no '## $VERSION' section"; exit 1; }
 xcodegen generate >/dev/null
+xcodebuild -project MicCheck.xcodeproj -scheme MicCheck -resolvePackageDependencies -derivedDataPath build >/dev/null 2>&1
 xcodebuild -project MicCheck.xcodeproj -scheme MicCheck -configuration Release \
   -derivedDataPath build clean build 2>&1 | grep -E "error:|warning:|BUILD" | grep -v appintents || true
 [[ -d "$APP" ]] || { echo "Build failed: $APP missing"; exit 1; }
@@ -114,6 +131,40 @@ if (( SKIP_NOTARIZE == 0 )); then
   spctl --assess --type open --context context:primary-signature --verbose=2 "$DMG"
 else
   print -P "%F{yellow}Skipped notarization; this DMG will be blocked by Gatekeeper on other Macs.%f"
+fi
+
+step "Release notes and appcast"
+# Extract this version's CHANGELOG section as Markdown (for GitHub) and HTML (embedded in the appcast).
+NOTES_MD="$DIST/notes.md"
+awk -v v="$VERSION" '/^## /{p=($2==v)} p && !/^## /' CHANGELOG.md | sed '/./,$!d' > "$NOTES_MD"
+python3 - "$NOTES_MD" "$DIST/Mic-Check-$VERSION.html" <<'PY'
+import html, sys
+lines = open(sys.argv[1]).read().splitlines()
+out, in_list = [], False
+for l in lines:
+    if l.startswith("- "):
+        if not in_list: out.append("<ul>"); in_list = True
+        out.append("<li>" + html.escape(l[2:]) + "</li>")
+    else:
+        if in_list: out.append("</ul>"); in_list = False
+        if l.strip(): out.append("<p>" + html.escape(l) + "</p>")
+if in_list: out.append("</ul>")
+open(sys.argv[2], "w").write("\n".join(out) + "\n")
+PY
+[[ -f appcast.xml ]] && cp appcast.xml "$DIST/appcast.xml"   # keep earlier versions in the feed
+"$SPARKLE_BIN/generate_appcast" --download-url-prefix "https://github.com/$REPO/releases/download/v$VERSION/" \
+  --embed-release-notes -o "$DIST/appcast.xml" "$DIST" | grep -vE "^\s*$" || true
+cp "$DIST/appcast.xml" appcast.xml
+grep -E "sparkle:version|sparkle:shortVersionString|enclosure" appcast.xml | tail -3
+
+if (( PUBLISH == 1 )); then
+  (( SKIP_NOTARIZE == 0 )) || { echo "Refusing to publish an unnotarized build"; exit 1; }
+  step "Publishing v$VERSION"
+  git add appcast.xml CHANGELOG.md project.yml
+  git diff --cached --quiet || git commit -q -m "Release $VERSION"
+  git push -q origin main
+  gh release create "v$VERSION" "$DMG" --repo "$REPO" --title "Mic Check $VERSION" --notes-file "$NOTES_MD"
+  gh release view "v$VERSION" --repo "$REPO" --json url -q .url
 fi
 
 step "Done"

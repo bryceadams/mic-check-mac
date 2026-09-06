@@ -43,4 +43,10 @@ struct InputDevice: Identifiable, Equatable {
     let uid: String
     let systemName: String
     let transport: TransportKind
+    /// True when the device also has output streams (a headset), not just a microphone.
+    let hasOutput: Bool
+
+    /// Using a Bluetooth headset's mic drops that headset to the low-quality hands-free profile.
+    /// Input-only Bluetooth devices (wireless mic transmitters) are unaffected.
+    var degradesOutputWhenUsedAsInput: Bool { transport.isBluetooth && hasOutput }
 }

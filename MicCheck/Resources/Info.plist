@@ -28,5 +28,13 @@
 	<string>© 2026 Bryce Adams</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Mic Check listens to your input devices to show live level meters and, when you run a sound test, plays a short clip back to you. Nothing is saved or sent anywhere.</string>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>https://raw.githubusercontent.com/bryceadams/mic-check-mac/main/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>bo1akQAFQk/gopzGnahoq89UHTFl9l71jVnhGISVgIY=</string>
+	<key>SUScheduledCheckInterval</key>
+	<integer>86400</integer>
 </dict>
 </plist>

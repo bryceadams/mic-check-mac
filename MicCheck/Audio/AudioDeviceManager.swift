@@ -40,7 +40,8 @@ final class AudioDeviceManager {
             guard let uid = CoreAudioHelpers.getString(id, CoreAudioHelpers.address(kAudioDevicePropertyDeviceUID)) else { return nil }
             let name = CoreAudioHelpers.getString(id, CoreAudioHelpers.address(kAudioObjectPropertyName)) ?? "Unknown Device"
             let raw = CoreAudioHelpers.get(id, CoreAudioHelpers.address(kAudioDevicePropertyTransportType), default: UInt32(0)) ?? 0
-            return InputDevice(id: id, uid: uid, systemName: name, transport: TransportKind(rawTransport: raw))
+            let outputs = CoreAudioHelpers.getArray(id, CoreAudioHelpers.address(kAudioDevicePropertyStreams, scope: kAudioObjectPropertyScopeOutput), of: AudioStreamID.self)
+            return InputDevice(id: id, uid: uid, systemName: name, transport: TransportKind(rawTransport: raw), hasOutput: !outputs.isEmpty)
         }
         .sorted { $0.systemName.localizedCaseInsensitiveCompare($1.systemName) == .orderedAscending }
     }

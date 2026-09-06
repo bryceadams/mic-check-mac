@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct MicCheckApp: App {
     @State private var model = MicCheckModel()
+    @State private var updates = UpdateController()
 
     init() {
         _ = ScreenshotRenderer.runIfRequested()
@@ -12,6 +13,7 @@ struct MicCheckApp: App {
         MenuBarExtra {
             MenuPanelView()
                 .environment(model)
+                .environment(updates)
         } label: {
             MenuBarLabel()
                 .environment(model)
@@ -19,7 +21,7 @@ struct MicCheckApp: App {
         .menuBarExtraStyle(.window)
 
         Settings {
-            SettingsView().environment(model)
+            SettingsView().environment(model).environment(updates)
         }
     }
 

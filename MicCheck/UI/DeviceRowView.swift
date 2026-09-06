@@ -39,7 +39,7 @@ struct DeviceRowView: View {
                             .font(.system(size: 13, weight: current ? .semibold : .regular))
                             .lineLimit(1)
                     }
-                    if device.transport.isBluetooth {
+                    if device.degradesOutputWhenUsedAsInput {
                         Text("Lowers output quality")
                             .font(.system(size: 11))
                             .foregroundStyle(.secondary)
@@ -56,7 +56,7 @@ struct DeviceRowView: View {
         }
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
-        .opacity(device.transport.isBluetooth && !current ? 0.75 : 1)
+        .opacity(device.degradesOutputWhenUsedAsInput && !current ? 0.75 : 1)
         .contextMenu {
             Button("Rename…") { beginRename() }
             if model.prefs.deviceNames[device.uid] != nil {

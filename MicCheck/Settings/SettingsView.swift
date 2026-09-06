@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(MicCheckModel.self) private var model
+    @Environment(UpdateController.self) private var updates: UpdateController?
     @State private var launchAtLogin = false
 
     var body: some View {
@@ -19,6 +20,17 @@ struct SettingsView: View {
                 }
                 Toggle("Hide virtual and aggregate devices", isOn: $prefs.hideVirtualDevices)
                     .onChange(of: prefs.hideVirtualDevices) { _, _ in model.preferencesDidChange() }
+                if let updates {
+                    Section("Updates") {
+                        Toggle("Automatically check for updates", isOn: Binding(
+                            get: { updates.automaticallyChecksForUpdates },
+                            set: { updates.automaticallyChecksForUpdates = $0 }
+                        ))
+                        LabeledContent("Version", value: updates.versionString)
+                        Button("Check Now…") { updates.checkForUpdates() }
+                            .disabled(!updates.canCheckForUpdates)
+                    }
+                }
             }
             .formStyle(.grouped)
             .tabItem { Label("General", systemImage: "gear") }
@@ -26,7 +38,7 @@ struct SettingsView: View {
             DevicesSettingsView()
                 .tabItem { Label("Devices", systemImage: "mic") }
         }
-        .frame(width: 440, height: 340)
+        .frame(width: 440, height: 420)
         .onAppear { launchAtLogin = model.launchesAtLogin }
     }
 }
