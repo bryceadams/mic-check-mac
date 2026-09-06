@@ -45,6 +45,13 @@ final class DeviceLevelMeter {
         self.deviceID = deviceID
     }
 
+    /// A meter that never runs and always reports `fixedLevel`. Used for screenshot rendering.
+    init(deviceID: AudioDeviceID, fixedLevel: AudioLevel) {
+        self.deviceID = deviceID
+        self.level = fixedLevel
+        self.stopped = true
+    }
+
     func start() {
         guard !isRunning, procID == nil else { return }
         stopped = false

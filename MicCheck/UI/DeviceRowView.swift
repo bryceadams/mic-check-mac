@@ -40,7 +40,7 @@ struct DeviceRowView: View {
                             .lineLimit(1)
                     }
                     if device.transport.isBluetooth {
-                        Text("Bluetooth input lowers output quality")
+                        Text("Lowers output quality")
                             .font(.system(size: 11))
                             .foregroundStyle(.secondary)
                     }

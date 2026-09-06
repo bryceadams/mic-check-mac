@@ -4,6 +4,10 @@ import SwiftUI
 struct MicCheckApp: App {
     @State private var model = MicCheckModel()
 
+    init() {
+        _ = ScreenshotRenderer.runIfRequested()
+    }
+
     var body: some Scene {
         MenuBarExtra {
             MenuPanelView()

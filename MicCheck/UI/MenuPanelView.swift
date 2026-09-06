@@ -45,7 +45,7 @@ struct MenuPanelView: View {
             }
             LevelMeterView(level: model.currentLevel, height: 8)
             soundTestStatus
-            if let gain = model.audio.defaultInputGain {
+            if let gain = model.currentGain {
                 HStack(spacing: 10) {
                     Image(systemName: "mic").font(.system(size: 12)).foregroundStyle(.secondary)
                     Slider(value: Binding(get: { Double(gain) }, set: { model.audio.setGain(Float($0)) }), in: 0...1)
@@ -104,10 +104,16 @@ struct MenuPanelView: View {
             Label("Lock current input", systemImage: "lock")
                 .font(.system(size: 13))
             Spacer()
-            Toggle("", isOn: Binding(get: { model.isLocked }, set: { model.setLocked($0) }))
-                .toggleStyle(.switch)
-                .controlSize(.mini)
-                .labelsHidden()
+            if model.demo != nil {
+                // ImageRenderer cannot draw the AppKit-backed switch; draw a static one for screenshots.
+                Capsule().fill(Color.accentColor).frame(width: 26, height: 15)
+                    .overlay(alignment: .trailing) { Circle().fill(.white).frame(width: 12, height: 12).padding(1.5).shadow(radius: 0.5, y: 0.5) }
+            } else {
+                Toggle("", isOn: Binding(get: { model.isLocked }, set: { model.setLocked($0) }))
+                    .toggleStyle(.switch)
+                    .controlSize(.mini)
+                    .labelsHidden()
+            }
         }
         .padding(.horizontal, 10).padding(.vertical, 6)
         .help("Re-select this input if macOS or another app changes it")

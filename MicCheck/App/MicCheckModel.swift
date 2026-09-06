@@ -14,6 +14,16 @@ final class MicCheckModel {
     let soundTest = SoundTest()
 
     private(set) var meters: [AudioDeviceID: DeviceLevelMeter] = [:]
+
+    /// Fixed example data used only when rendering README screenshots (see ScreenshotRenderer).
+    struct Demo {
+        var devices: [InputDevice]
+        var currentID: AudioDeviceID
+        var levels: [AudioDeviceID: AudioLevel]
+        var gain: Float
+        var locked: Bool
+    }
+    var demo: Demo?
     private(set) var panelIsOpen = false
     private(set) var microphoneAccess: AVAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: .audio)
     private var menuBarMeter: DeviceLevelMeter?
@@ -28,7 +38,8 @@ final class MicCheckModel {
 
     /// Devices shown in the panel, after the virtual filter and per-device hides.
     var visibleDevices: [InputDevice] {
-        audio.devices.filter { device in
+        if let demo { return demo.devices }
+        return audio.devices.filter { device in
             if prefs.hideVirtualDevices && (device.transport.isVirtual || device.transport == .aggregate) { return false }
             // iPhone (Continuity Camera) mics appear whenever a phone is nearby and wake it when tapped; never list them
             // unless one is already the current input.
@@ -38,9 +49,15 @@ final class MicCheckModel {
         }
     }
 
-    var currentDevice: InputDevice? { audio.defaultInput }
+    var currentDevice: InputDevice? {
+        if let demo { return demo.devices.first { $0.id == demo.currentID } }
+        return audio.defaultInput
+    }
 
-    func isCurrent(_ device: InputDevice) -> Bool { device.id == audio.defaultInputID }
+    func isCurrent(_ device: InputDevice) -> Bool { device.id == (demo?.currentID ?? audio.defaultInputID) }
+
+    /// Input gain shown in the header, 0...1, or nil when the device has no software gain control.
+    var currentGain: Float? { demo?.gain ?? audio.defaultInputGain }
 
     func select(_ device: InputDevice) {
         guard audio.setDefaultInput(device.id) else { return }
@@ -51,7 +68,7 @@ final class MicCheckModel {
 
     // MARK: Lock
 
-    var isLocked: Bool { prefs.lockInput }
+    var isLocked: Bool { demo?.locked ?? prefs.lockInput }
 
     func setLocked(_ locked: Bool) {
         prefs.lockInput = locked
@@ -114,10 +131,12 @@ final class MicCheckModel {
     }
 
     func meter(for device: InputDevice) -> DeviceLevelMeter? {
-        meters[device.id] ?? (menuBarMeter?.deviceID == device.id ? menuBarMeter : nil)
+        if let demo { return DeviceLevelMeter(deviceID: device.id, fixedLevel: demo.levels[device.id] ?? .silent) }
+        return meters[device.id] ?? (menuBarMeter?.deviceID == device.id ? menuBarMeter : nil)
     }
 
     var currentLevel: AudioLevel {
+        if let demo { return demo.levels[demo.currentID] ?? .silent }
         if case .recording = soundTest.phase { return soundTest.level }
         guard let id = audio.defaultInputID else { return .silent }
         return meters[id]?.level ?? menuBarMeter?.level ?? .silent

@@ -6,6 +6,13 @@
 
 <p align="center">A small macOS menu bar app for switching your microphone and seeing that it actually hears you.</p>
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/panel-dark.png">
+    <img src="docs/panel-light.png" width="400" alt="Mic Check panel showing the current input with a live level meter, gain slider, a list of input devices each with its own meter, and a lock toggle">
+  </picture>
+</p>
+
 ---
 
 Switching mics on a Mac means a trip to System Settings, and even then you can't tell whether the mic you picked is live. Mic Check puts the input list one click away in the menu bar, with a live level meter next to every device, so you can see which one is hearing you before you join the call.
@@ -44,6 +51,8 @@ open "build/Build/Products/Debug/Mic Check.app"
 The project is described in `project.yml`; the generated `.xcodeproj` is not checked in. Signing uses a Developer ID identity, so set your own team in `project.yml` or switch `CODE_SIGN_STYLE` to `Automatic` to build with a development certificate.
 
 `scripts/release.sh` builds a Release binary, notarizes it, and packages a DMG. See the comments at the top of that script for the one-time notarization credential setup.
+
+The README screenshots are rendered by the app itself from example data: run the built binary with `--render-screenshots <directory>`.
 
 ## How it works
 
