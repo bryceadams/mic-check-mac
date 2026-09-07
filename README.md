@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/hero.png" width="840" alt="Mic Check open from the menu bar: the current input with a live level meter and gain slider, a list of input devices each with its own meter, and a lock toggle">
+  <img src="docs/hero.jpg" width="840" alt="Mic Check open from the menu bar: the current input with a live level meter and gain slider, a list of input devices each with its own meter, and a lock toggle">
 </p>
 
 ---
